@@ -16,7 +16,7 @@ namespace BoredGamesBot.Games.Common
             height = h;
             width = w;
             boardState = new int[height, width];
-			SetBoardState(0);
+			SetBoardState(65);
 
 		}
         public virtual void SetBoardState(int value = 0)
@@ -101,9 +101,9 @@ namespace BoredGamesBot.Games.Common
 
 				for (int j = 0; j < width; j++)
 				{
-					retString += "\u2551" + "\u2000" + "\u2004";
+					retString += "\u2551" + "\u2004" + "\u2004";
 					retString += ConvertToSymbol(boardState[i, j]);
-					retString += "\u2004" + "\u2004";
+					retString += "\u2004" + "\u2005";
 				}
 
 				retString += "\u2551";
@@ -156,9 +156,10 @@ namespace BoredGamesBot.Games.Common
         {
 			if (s == -1)
 				return "\u0009";
-			//	return "\u2004" + "\u2004"; 
+			else if (s <10)
+				return s.ToString() + AddSpacesToChar(s);
 			else
-				return s.ToString() + AddSpacesToChar(s) ;
+				return (char)s + AddSpacesToChar(s);
         }
 
 		public virtual string AddChar(int s)
@@ -185,6 +186,8 @@ namespace BoredGamesBot.Games.Common
 				return "\u2004";
 			//two thin space
 			else if (s == 67)
+				return "\u2009" + "\u2009";
+			else if (s == 88)
 				return "\u2009" + "\u2009";
 			else
 				return s.ToString();

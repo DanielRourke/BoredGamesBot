@@ -10,18 +10,18 @@ namespace BoredGamesBot.Games.TicTacToe
 
         public TicTacToeBoard(int h = 3, int w =3): base(h,w)
         {
-            SetBoardState(2);
+            SetBoardState(88);
         }
 
-        public override string ConvertToSymbol(int s)
-        {
-            if (s == -1)
-                return "\u2004" + "\u2004";
-            else if (s == 2)
-                return "X";
-            else
-                return s.ToString();
-        }
+        //public override string ConvertToSymbol(int s)
+        //{
+        //    if (s == -1)
+        //        return "\u2004" + "\u2009" + "\u2009" + "\u200A" ;
+        //    else if (s == 2)
+        //        return "X";
+        //    else
+        //        return s.ToString();
+        //}
 
         public override void UpdateBoard(Move move)
         {

@@ -11,6 +11,8 @@ namespace BoredGamesBot.Modules
 {
     public class GameModule : ModuleBase<SocketCommandContext>
     {
+
+
         [Command("ping")]
         [Alias("pong", "hello")]
         public Task PingAsync()
