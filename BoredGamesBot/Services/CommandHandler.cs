@@ -41,6 +41,7 @@ namespace BoredGamesBot.Services
             if (!(rawMessage is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
+            
             // This value holds the offset where the prefix ends
             var argPos = 0;
             // Perform prefix check. You may want to replace this with

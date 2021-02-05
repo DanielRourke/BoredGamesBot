@@ -1,4 +1,6 @@
-﻿using Discord.Commands;
+﻿using BoredGamesBot.Games.Common;
+using BoredGamesBot.Games.TicTacToe;
+using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -10,13 +12,14 @@ namespace BoredGamesBot.Services
     class GameService
     {
 
+        List<Game> CurrentGames;
         private readonly DiscordSocketClient _discord;
 
         public GameService(DiscordSocketClient discord)
         {
            
             _discord = discord;
-
+            
             // Reaction added 
             //_discord.ReactionAdded
         }
@@ -28,8 +31,12 @@ namespace BoredGamesBot.Services
 
         public async Task CreateGameAsync()
         {
-
+            CurrentGames.Add());
         }
+
+
+
+
 
 
     }
