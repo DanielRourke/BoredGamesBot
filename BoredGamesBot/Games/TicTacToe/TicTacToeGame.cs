@@ -5,23 +5,48 @@ using System.Text;
 
 namespace BoredGamesBot.Games.TicTacToe
 {
-    class TicTacToeGame : Game
+    public class TicTacToeGame : Game
     {
+        TicTacToeBoard board;
+        int currentPlayer;
+        List<Player> players;
         TicTacToeGame()
         {
-            
+            currentPlayer = 0;
         }
-        public override void SelectStatingState()
+
+        public void Begin()
         {
             throw new NotImplementedException();
         }
 
-        public override void Start()
+        public void Conclude()
         {
             throw new NotImplementedException();
         }
 
-        public override void Stop()
+        public void isGameOver()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void NextTurn()
+        {
+            //print board
+            //notify player its their turn
+            throw new NotImplementedException();
+        }
+
+        public bool AttemptMove(Move move, ulong playerID)
+        {
+            //if move Valid
+            if(board.ValidMove(move) && players[currentPlayer].ID == playerID)
+
+            board.UpdateBoard(move);
+
+        }
+
+        public void SetUp()
         {
             throw new NotImplementedException();
         }

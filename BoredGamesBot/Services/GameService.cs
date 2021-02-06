@@ -11,8 +11,9 @@ namespace BoredGamesBot.Services
 {
     class GameService
     {
-
-        List<Game> CurrentGames;
+        //  Dictionary<int, Game> CurrentGames;
+        //   Dictionary<int, LinkedList<int>> PlayerCurrentGames;
+        Game game;
         private readonly DiscordSocketClient _discord;
 
         public GameService(DiscordSocketClient discord)
@@ -24,14 +25,19 @@ namespace BoredGamesBot.Services
             //_discord.ReactionAdded
         }
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
-
+           // CurrentGames = new  Dictionary<int, Game>();
+          //  PlayerCurrentGames = new Dictionary<int, LinkedList<int>>();
         }
 
         public async Task CreateGameAsync()
         {
-            CurrentGames.Add());
+
+            //CurrentGames.Add();
+
+            game = new TicTacToeGame();
+
         }
 
 

@@ -11,7 +11,7 @@ namespace BoredGamesBot.Modules
 {
     public class GameModule : ModuleBase<SocketCommandContext>
     {
-
+        TicTacToeGame game;
 
         [Command("ping")]
         [Alias("pong", "hello")]
@@ -50,6 +50,34 @@ namespace BoredGamesBot.Modules
         }
 
         // Get info on a user, or the user who invoked the command if one is not specified
+        [Command("play")]
+        public async Task PlayAsync()
+        {
+            Context.u
+            game.AttemptMove()
+
+            await ReplyAsync(" " );
+        }
+
+        // Get info on a user, or the user who invoked the command if one is not specified
+        [Command("move")]
+        public async Task Async(int row, char col)
+        {
+            
+            Move move = new TicTacToeMove(row, col);
+
+            if(game.AttemptMove(move, Context.User.Id))
+            {
+                string s = game.board.ToString();
+                Console.Write(s);
+                await ReplyAsync(s);
+            }
+
+            await ReplyAsync(" ");
+        }
+
+
+        // Get info on a user, or the user who invoked the command if one is not specified
         [Command("embed")]
         public async Task EmbedAysnc()
         {
@@ -67,7 +95,7 @@ namespace BoredGamesBot.Modules
     
            
 
-                await ReplyAsync(embed: embed);
+            await ReplyAsync(embed: embed);
         }
     }
 }

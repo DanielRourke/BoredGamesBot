@@ -10,16 +10,19 @@ namespace BoredGamesBot.Games.Common
     class DiscordUserPlayer : Player
     {
         public override string Name => name;
+        public override ulong ID => id;
 
-        public DiscordUserPlayer(SocketUser user, char symbol, Game g) : base(user.ToString(),g )
+        private SocketUser player;
+
+        public DiscordUserPlayer(SocketUser user) : base(user.ToString())
         {
             id = user.Id;
-            this.symbol = symbol;
+            player = user;
         }
-        public override Move SelectMove(int[,] boardState)
+        public override void TakeTurn(Board board)
         {
-            List<Move> moves = Game.Board.GetPossibleMoves();
-            return moves[0];
+            List<Move> moves = board.GetPossibleMoves();
+            player.
         }
     }
 }

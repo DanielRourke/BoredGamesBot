@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BoredGamesBot.Games.Common
 {
-    abstract class Move
+    public abstract class Move
     {
         int cost;
         int utility;

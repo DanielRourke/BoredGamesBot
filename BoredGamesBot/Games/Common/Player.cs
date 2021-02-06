@@ -10,19 +10,22 @@ namespace BoredGamesBot.Games.Common
     {
         protected string name;
         protected ulong id;
-        protected Game Game { get; set; }
-        protected char symbol;
 
-        protected Player(string n, Game g)
+        protected Player(string n)
         {
             name = n;
-            Game = g;
+            id = 0;
         }
         public abstract string Name
         {
             get;
         }
 
-        public abstract Move SelectMove(int[,] boardState);
+        public abstract ulong ID
+        {
+            get;
+        }
+
+        public abstract void TakeTurn(Board board);
     }
 }
