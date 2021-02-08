@@ -5,9 +5,8 @@ using System.Text;
 
 namespace BoredGamesBot.Games.TicTacToe
 {
-    class TicTacToeBoard : Board
+    class TicTacToeBoard : Board<TicTacToeMove>
     {
-
         public TicTacToeBoard(int h = 3, int w =3): base(h,w)
         {
             SetBoardState(88);
@@ -23,19 +22,44 @@ namespace BoredGamesBot.Games.TicTacToe
         //        return s.ToString();
         //}
 
-        public override void UpdateBoard(Move move)
+        public override void UpdateBoard(TicTacToeMove move)
         {
-            throw new NotImplementedException();
+            int r = move.Row ;
+            int c = move.Col - 'A';
+            boardState[r,c] = move.Token;
         }
 
-        public override bool ValidMove(Move move)
+        public override bool ValidMove(TicTacToeMove move)
         {
-            throw new NotImplementedException();
+            int r = move.Row;
+            int c = move.Col - 'A';
+            if (r < 0 || r >= width || c < 0 || c >= height || boardState[r,c] != -1)
+                return false;
+
+            return true;
         }
 
-        public override List<Move> GetPossibleMoves()
+        public override List<TicTacToeMove> GetPossibleMoves()
         {
-            throw new NotImplementedException();
+            List<TicTacToeMove> moves = new List<TicTacToeMove>();
+            for(int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (boardState[i, j] == -1)
+                    {
+                        TicTacToeMove move = new TicTacToeMove();
+                        move.Cost = 1;
+                        move.Utility = 1;
+                        move.Row = i;
+                        move.Col = (char)(j + 'A');
+                        moves.Add(move);
+                    }
+                }
+            }
+
+            return moves;
+
         }
     }
 }

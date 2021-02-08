@@ -7,7 +7,8 @@ namespace BoredGamesBot.Games.TicTacToe
 {
     class TicTacToeMove : Move
     {
-        char row;
-        int col;
+        public char Col { get; set; }
+        public int Row { get; set; }
+
     }
 }

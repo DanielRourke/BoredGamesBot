@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BoredGamesBot.Games.Common
 {
-    abstract class Board
+    public abstract class Board<T> where T : Move
     {
         protected int width;
         protected int height;
@@ -17,7 +17,6 @@ namespace BoredGamesBot.Games.Common
             width = w;
             boardState = new int[height, width];
 			SetBoardState(65);
-
 		}
         public virtual void SetBoardState(int value = 0)
         {
@@ -51,7 +50,7 @@ namespace BoredGamesBot.Games.Common
         public override string ToString()
 		{
 			
-			string retString = "'\n";
+			string retString = "'''\n";
 			//top numbers
 			retString += "\u0009";
 			retString += "\u2004";
@@ -146,7 +145,7 @@ namespace BoredGamesBot.Games.Common
 					retString += "\u2569";
 				}
 			}
-			retString += "\u255D" + '\n' + "'";
+			retString += "\u255D" + '\n' + "'''";
 
 			return retString;
 		}
@@ -200,8 +199,8 @@ namespace BoredGamesBot.Games.Common
 			 */
 		}
 
-		public abstract void UpdateBoard(Move move);
-        public abstract bool ValidMove(Move move);
-        public abstract List<Move> GetPossibleMoves();
+		public abstract void UpdateBoard(T move);
+        public abstract bool ValidMove(T move);
+        public abstract List<T> GetPossibleMoves();
     }
 }
