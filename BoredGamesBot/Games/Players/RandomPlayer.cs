@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BoredGamesBot.Games.Players
 {
@@ -16,12 +17,12 @@ namespace BoredGamesBot.Games.Players
             Name = "Randy";
             Token = token;
         }
-        public T SelectMoveAsync(Board<T> board)
+        public async Task<T> SelectMoveAsync(Board<T> board)
         {
             Random rnd = new Random();
             List<T> possibleMoves =  board.GetPossibleMoves();
             T selected = possibleMoves[rnd.Next(0, possibleMoves.Count)];
-            selected.Token = Token;
+            selected.Token = (char)Token;
             return selected;
         }
     }

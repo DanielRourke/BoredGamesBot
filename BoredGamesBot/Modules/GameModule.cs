@@ -1,19 +1,23 @@
 ﻿using BoredGamesBot.Games.Common;
 using BoredGamesBot.Games.TicTacToe;
 using BoredGamesBot.Services;
+using Interactivity;
+using Interactivity.Selection;
 using Discord;
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using Interactivity.Confirmation;
 
 namespace BoredGamesBot.Modules
 {
     public class GameModule : ModuleBase<SocketCommandContext>
     {
         public GameService GameService { get; set; }
-
+        public InteractivityService Interactivity { get; set; }
 
         [Command("ping")]
         [Alias("pong", "hello")]
@@ -77,15 +81,61 @@ namespace BoredGamesBot.Modules
             reply = await GameService.PlayAysnc(Context);
 
             await ReplyAsync(reply.ToString());
+        }
 
 
+        [Command("interact")]
+        public async Task Interact()
+        {
+            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
+
+            if (result.IsSuccess == true)
+            {
+                Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
+              
+            }
+            ReplyAsync(result.IsSuccess.ToString());
+        }
+
+        [Command("confirm")]
+        public async Task ConfirmAsync()
+        {
+            var request = new ConfirmationBuilder()
+                .WithContent(new PageBuilder().WithText("Please Confirm"))
+                .Build();
+
+            var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
+
+            if (result.Value == true)
+            {
+                await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Declined :thumbsup:!");
+            }
+        }
+
+        [Command("nextmessage")]
+        public async Task ExampleReplyNextMessageAsync()
+        {
+            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
+
+            if (result.IsSuccess == true)
+            {
+                Interactivity.DelayedSendMessageAndDeleteAsync(
+                                Context.Channel,
+                                deleteDelay: TimeSpan.FromSeconds(20),
+                                text: result.Value.Content,
+                                embed: result.Value.Embeds.FirstOrDefault());
+            }
         }
 
         [Command("create")]
         public async Task CreateGame()
         {
             string reply;
-            if (GameService.CreateNewGame(Context))
+            if (GameService.CreateNewGame(Context, Interactivity))
             {
                 reply = "Game Created";
 

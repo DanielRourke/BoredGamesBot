@@ -2,6 +2,7 @@
 using BoredGamesBot.Games.Players;
 using Discord.Commands;
 using Discord.WebSocket;
+using Interactivity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,10 +28,10 @@ namespace BoredGamesBot.Games.TicTacToe
         //    board = new TicTacToeBoard();
         //}
 
-        public TicTacToe(ICommandContext context)
+        public TicTacToe(ICommandContext context, InteractivityService interactivity)
         {
-            players.Add(new DiscordUserPlayer<TicTacToeMove, ICommandContext>(context, 'X'));
-            players.Add(new RandomPlayer<TicTacToeMove>('0'));
+            players.Add(new DiscordUserPlayer<TicTacToeMove, ICommandContext>(context, 'X', interactivity));
+            players.Add(new RandomPlayer<TicTacToeMove>('O'));
             playerTurn = 0;
             board = new TicTacToeBoard();
         }
@@ -41,9 +42,9 @@ namespace BoredGamesBot.Games.TicTacToe
         }
 
 
-        public override void Start()
+        public void Start() 
         {
-            SelectStatingState();
+           SelectStatingState();
             board.ToString();
         }
     }

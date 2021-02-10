@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using System.Linq;
 
 namespace BoredGamesBot.Games.Players
 {
@@ -26,22 +27,34 @@ namespace BoredGamesBot.Games.Players
        {
             Id = user.Id;
             Token = token;
-            Name = ToString();
+            Name = user.Username;
        }
 
-        public DiscordUserPlayer(U context, int token )
+        public DiscordUserPlayer(U context, int token, InteractivityService interactivity)
         {
 
             Context = context;
             Id = Context.User.Id;
             Token = token;
-            Name = ToString();
+            Name = Context.User.Username;
+            Interactivity = interactivity;
         }
 
-        public T SelectMoveAsync(Board<T> board)
+
+        public async Task<T> SelectMoveAsync(Board<T> board)
         {
-            Context.Channel.SendMessageAsync(board.ToString());
-            ExampleReactionSelectionAsync();
+            await Context.Channel.SendMessageAsync(board.ToString() + $"\n {Name} , your turn!");
+            //Context.Guild.
+
+            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
+
+            if (result.IsSuccess == true)
+            {
+                Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
+            }
+
+
+            //ExampleReactionSelectionAsync();
             return board.GetPossibleMoves()[0];
         }
 
@@ -72,7 +85,7 @@ namespace BoredGamesBot.Games.Players
 
             if (result.IsSuccess == true)
             {
-                await Context.Channel.SendMessageAsync(result.Value.ToString());
+            //    await Context.Channel.SendMessageAsync(result.Value.ToString());
             }
         }
     }

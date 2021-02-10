@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BoredGamesBot.Games.Common
 {
@@ -11,6 +12,6 @@ namespace BoredGamesBot.Games.Common
     {
         string Name { get; set; }
         int Token { get; set; }
-        public abstract T SelectMoveAsync(Board<T> board);
+        public abstract Task<T> SelectMoveAsync(Board<T> board);
     }
 }

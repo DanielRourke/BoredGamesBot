@@ -1,6 +1,7 @@
 ﻿using BoredGamesBot.Games.Common;
 using BoredGamesBot.Games.Players;
 using BoredGamesBot.Games.TicTacToe;
+using Interactivity;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -31,17 +32,18 @@ namespace BoredGamesBot.Services
         }
 
 
-        public Task<int> PlayAysnc(ICommandContext Context)
+        public async Task<int> PlayAysnc(ICommandContext Context)
         {
            
-            int result =currentGames.GetValueOrDefault(Context.User.Id).Play();
+            int result = await currentGames.GetValueOrDefault(Context.User.Id).PlayAsync();
 
-            return Task.FromResult<int>(result);
+            // return Task.FromResult<int>(result);
+             return result;
         }
 
-        public bool CreateNewGame(ICommandContext Context)
+        public bool CreateNewGame(ICommandContext Context, InteractivityService Interactivity)
         {
-            currentGames.Add(Context.User.Id, new TicTacToe(Context));
+            currentGames.Add(Context.User.Id, new TicTacToe(Context, Interactivity));
             currentGames.GetValueOrDefault(Context.User.Id).Start();
       
             return true;

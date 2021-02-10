@@ -63,7 +63,7 @@ namespace BoredGamesBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<GameService>()
-                .AddSingleton(new InteractivityService(_client, TimeSpan.FromSeconds(20)))
+                .AddSingleton(new InteractivityService(_client, TimeSpan.FromSeconds(120)))
                 .BuildServiceProvider();
         }
 
