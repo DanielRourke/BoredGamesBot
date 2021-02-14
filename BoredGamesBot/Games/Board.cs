@@ -202,5 +202,10 @@ namespace BoredGamesBot.Games.Common
 		public abstract void UpdateBoard(T move);
         public abstract bool ValidMove(T move);
         public abstract List<T> GetPossibleMoves();
+
+		public int[,] GetBoardState()
+		{
+			return boardState;
+		}
     }
 }

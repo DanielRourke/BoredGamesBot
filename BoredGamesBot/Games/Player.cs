@@ -12,6 +12,7 @@ namespace BoredGamesBot.Games.Common
     {
         string Name { get; set; }
         int Token { get; set; }
+        ulong Id { get; set; }
         public abstract Task<T> SelectMoveAsync(Board<T> board);
     }
 }

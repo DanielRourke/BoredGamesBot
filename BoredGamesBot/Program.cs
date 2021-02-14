@@ -2,7 +2,7 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Interactivity;
+using Discord.Addons.Interactive;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -63,7 +63,7 @@ namespace BoredGamesBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<GameService>()
-                .AddSingleton(new InteractivityService(_client, TimeSpan.FromSeconds(120)))
+                .AddSingleton<InteractiveService>()
                 .BuildServiceProvider();
         }
 

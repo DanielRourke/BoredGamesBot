@@ -1,7 +1,6 @@
 ﻿using BoredGamesBot.Games.Common;
 using Discord.WebSocket;
-using Interactivity;
-using Interactivity.Selection;
+using Discord.Addons.Interactive;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,84 +8,93 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using System.Linq;
+using System.Threading;
 
 namespace BoredGamesBot.Games.Players
 {
-    public class DiscordUserPlayer<T, U> : IPlayer<T>
+    public class DiscordUserPlayer<T> : IPlayer<T>
         where T : Move
-        where U : class, ICommandContext
     {
-
-        public U Context { get; set; }
-        public InteractivityService Interactivity { get; set; }
+        public SocketCommandContext Context { get; set; } 
         public string Name { get; set; }
         public int Token { get; set; }
-        protected ulong Id { get; set; }
+        public ulong Id { get; set; }
 
-       public DiscordUserPlayer(SocketUser user, int token)
+        public DiscordUserPlayer(SocketUser user, int token)
        {
             Id = user.Id;
             Token = token;
             Name = user.Username;
        }
 
-        public DiscordUserPlayer(U context, int token, InteractivityService interactivity)
+        public DiscordUserPlayer(SocketCommandContext context, int token, InteractiveService interactivity)
         {
-
             Context = context;
+            Interactive = interactivity;
             Id = Context.User.Id;
             Token = token;
             Name = Context.User.Username;
-            Interactivity = interactivity;
         }
 
 
         public async Task<T> SelectMoveAsync(Board<T> board)
         {
-            await Context.Channel.SendMessageAsync(board.ToString() + $"\n {Name} , your turn!");
-            //Context.Guild.
 
-            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
+            T move = (T)Activator.CreateInstance(typeof(T));
+            move.Token = Token;
 
-            if (result.IsSuccess == true)
+         //   await ReplyAsync(board.ToString() + $"\n {Name} , your turn!");
+            var response = await NextMessageAsync();
+            if (response != null)
             {
-                Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
+                if (move.AttemptInit(response.Content))
+                    return move;
+                else 
+                {
+                    await ReplyAsync("That wasnt a Valid Move");
+                }
             }
+            else
+                await ReplyAsync("You did not reply before the timeout use !move to add a move or !play to continue play");
 
 
-            //ExampleReactionSelectionAsync();
-            return board.GetPossibleMoves()[0];
+            return null;
         }
 
-        public async Task ExampleMessageSelectionAsync()
+        private async Task ReplyAsync(string v)
         {
-            var builder = new MessageSelectionBuilder<string>()
-                .WithValues("Hi", "How", "Hey", "Huh?!")
-                .WithUsers((SocketUser)Context.User)
-                .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
-
-            var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
-
-            if (result.IsSuccess == true)
-            {
-                await Context.Channel.SendMessageAsync(result.Value.ToString());
-            }
+          await Context.Channel.SendMessageAsync(v);
         }
 
-        public async Task ExampleReactionSelectionAsync()
-        {
-            var builder = new ReactionSelectionBuilder<string>()
-                .WithValues("Hi", "How", "Hey", "Huh?!")
-                .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
-                .WithUsers((SocketUser)Context.User)
-                .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
+        public InteractiveService Interactive { get; set; }
 
-            var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+        public Task<SocketMessage> NextMessageAsync(ICriterion<SocketMessage> criterion, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
+            => Interactive.NextMessageAsync(Context, criterion, timeout, token);
+        public Task<SocketMessage> NextMessageAsync(bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
+            => Interactive.NextMessageAsync(Context, fromSourceUser, inSourceChannel, timeout, token);
 
-            if (result.IsSuccess == true)
-            {
-            //    await Context.Channel.SendMessageAsync(result.Value.ToString());
-            }
-        }
+        public Task<IUserMessage> ReplyAndDeleteAsync(string content, bool isTTS = false, Embed embed = null, TimeSpan? timeout = null, RequestOptions options = null)
+            => Interactive.ReplyAndDeleteAsync(Context, content, isTTS, embed, timeout, options);
+
+        //public Task<IUserMessage> PagedReplyAsync(IEnumerable<object> pages, bool fromSourceUser = true)
+        //{
+        //    var pager = new PaginatedMessage
+        //    {
+        //        Pages = pages
+        //    };
+        //    return PagedReplyAsync(pager, fromSourceUser);
+        //}
+        //public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, bool fromSourceUser = true)
+        //{
+        //    var criterion = new Criteria<SocketReaction>();
+        //    if (fromSourceUser)
+        //        criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
+        //    return PagedReplyAsync(pager, criterion);
+        //}
+        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketReaction> criterion)
+            => Interactive.SendPaginatedMessageAsync(Context, pager, criterion);
+
+        public RuntimeResult Ok(string reason = null) => new OkResult(reason);
+
     }
 }

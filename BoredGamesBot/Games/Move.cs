@@ -10,5 +10,6 @@ namespace BoredGamesBot.Games.Common
         public int Cost { get; set; }
         public int Utility { get; set; }
 
+        public abstract bool AttemptInit(String s);
     }
 }

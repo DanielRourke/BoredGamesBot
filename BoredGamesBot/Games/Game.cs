@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BoredGamesBot.Games.Players;
+using Discord.Commands;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +12,32 @@ namespace BoredGamesBot.Games.Common
     {
         protected List<IPlayer<T>> players;
         protected Board<T> board;
+        public SocketCommandContext Context { get; set; }
+        public Discord.Rest.RestUserMessage GameDisplay { get; set; }
 
         protected int playerTurn; 
-        protected bool playing;
+        public bool QuickPlay { get; set; }
+        protected int winner;
 
-        public Game()
+        public enum Status { Incomplete = -1,  Draw, WinOne, WinTwo};
+
+        public Game(SocketCommandContext context)
         {
+            Context = context;
             players = new List<IPlayer<T>>();
+            QuickPlay = true;
         }
+        
+        public virtual async Task StartAsync()
+        {
+            GameDisplay = await Context.Channel.SendMessageAsync("Base Game");
+
+            await GameDisplay.PinAsync();
+            await GameDisplay.ModifyAsync(msg => msg.Content = "test [edited]");
+
+            //GameDisplay = Context.Channel.S
+        }
+
         //public void Start()
         //{
         //    playing = true;
@@ -64,10 +84,10 @@ namespace BoredGamesBot.Games.Common
         //    }
 
 
-      //  }
+        //  }
         public void Stop()
         {
-            playing = false;
+            QuickPlay = false;
         }
         public abstract void SelectStatingState();
 
@@ -89,16 +109,23 @@ namespace BoredGamesBot.Games.Common
         //    return false;
         //}
 
+        public virtual bool AttemptMove(T m, ulong Id)
+        {
+            if( GetPlayerIndex(Id) == playerTurn )
+            {
+                m.Token = players[playerTurn].Token;
+                return  AttemptMove(m);
+            }
+
+            return false;
+        }
+
         public virtual bool AttemptMove(T m)
         {
             if (board.ValidMove(m))
             {
                 board.UpdateBoard(m);
-                //isGame over
-                //declare winner
-
                 SelectNextPlayer();
-
                 return true;
             }
 
@@ -164,34 +191,101 @@ namespace BoredGamesBot.Games.Common
         //    return playerTurn;
         //}
 
-        public async Task<int> PlayAsync()
+        public async Task<Status> PlayAsync(bool continuous = true)
         {
 
-            playing = true;
-            while (playing && board.GetPossibleMoves().Count > 0)
+           
+            
+            while ((continuous || players[playerTurn].GetType() != typeof(DiscordUserPlayer<T>)) && GameStatus() == Status.Incomplete)
             {
+                await GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
+                //await Context.Channel.SendMessageAsync(board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
                 T move = await players[playerTurn].SelectMoveAsync(board);
 
                 //not sure this should be here
                 if (move == null)
                 {
-                    playing = false;
+                    continuous = false;
                 }
-
-                if (board.ValidMove(move))
+                else
                 {
-                    board.UpdateBoard(move);
-                    SelectNextPlayer();
+                    AttemptMove(move);
                 }
             }
 
 
-            return playerTurn;
+            return GameStatus();
+        }
+
+        public async Task ContinuePlay()
+        {
+            SelectNextPlayer();
+            await PlayAsync(false);
+        }
+
+        public abstract void ConcludePlay();
+
+
+        public abstract Status GameStatus();
+
+        //public async Task NotifyBotAsync()
+        //{
+        //    if(players[playerTurn].GetType() != typeof(DiscordUserPlayer<T>))
+        //    {
+        //        T move = await players[playerTurn].SelectMoveAsync(board);
+
+        //        await AttemptMove(move);
+        //    }
+        //}
+
+        public int GetPlayerIndex(ulong id)
+        {
+            for (int k = 0; k < players.Count; k++)
+            {
+                if (players[k].GetType() == typeof(DiscordUserPlayer<T>) &&
+                    ((DiscordUserPlayer<T>)players[k]).Id == id )
+                {
+                    return k;
+                }
+            }
+
+            return -1;
+        }
+
+        public IPlayer<T> GetPlayer(ulong id)
+        {
+            for (int k = 0; k < players.Count; k++)
+            {
+                if (players[k].GetType() == typeof(DiscordUserPlayer<T>) &&
+                    ((DiscordUserPlayer<T>)players[k]).Id == id)
+                {
+                    return players[k];
+                }
+            }
+
+            return null;
+        }
+
+        public IPlayer<T> GetPlayer(int index)
+        {
+            if (index < 0 || index >= players.Count)
+                return null;
+
+            return players[index];
+        }
+
+        public List<IPlayer<T>> GetPlayers()
+        {
+            return players;
         }
 
 
 
 
+        public bool isPlayersTurn(ulong id)
+        {
+            return GetPlayerIndex(id) == playerTurn;
+        }
 
     }
 }

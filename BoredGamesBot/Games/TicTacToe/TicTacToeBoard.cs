@@ -9,7 +9,7 @@ namespace BoredGamesBot.Games.TicTacToe
     {
         public TicTacToeBoard(int h = 3, int w =3): base(h,w)
         {
-            SetBoardState(88);
+            SetBoardState(-1);
         }
 
         //public override string ConvertToSymbol(int s)

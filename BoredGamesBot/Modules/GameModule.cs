@@ -1,8 +1,7 @@
 ﻿using BoredGamesBot.Games.Common;
 using BoredGamesBot.Games.TicTacToe;
 using BoredGamesBot.Services;
-using Interactivity;
-using Interactivity.Selection;
+using Discord.Addons.Interactive;
 using Discord;
 using Discord.Commands;
 using System;
@@ -10,14 +9,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
-using Interactivity.Confirmation;
+
 
 namespace BoredGamesBot.Modules
 {
     public class GameModule : ModuleBase<SocketCommandContext>
     {
         public GameService GameService { get; set; }
-        public InteractivityService Interactivity { get; set; }
+        public InteractiveService Interactivity { get; set; }
 
         [Command("ping")]
         [Alias("pong", "hello")]
@@ -75,61 +74,17 @@ namespace BoredGamesBot.Modules
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        public async Task Play()
+        public async Task Play(int index = 0)
         {
-            int reply;
+  
+            string  reply;
             reply = await GameService.PlayAysnc(Context);
 
-            await ReplyAsync(reply.ToString());
+           await ReplyAsync(reply);
         }
 
 
-        [Command("interact")]
-        public async Task Interact()
-        {
-            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
-
-            if (result.IsSuccess == true)
-            {
-                Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
-              
-            }
-            ReplyAsync(result.IsSuccess.ToString());
-        }
-
-        [Command("confirm")]
-        public async Task ConfirmAsync()
-        {
-            var request = new ConfirmationBuilder()
-                .WithContent(new PageBuilder().WithText("Please Confirm"))
-                .Build();
-
-            var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
-
-            if (result.Value == true)
-            {
-                await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync("Declined :thumbsup:!");
-            }
-        }
-
-        [Command("nextmessage")]
-        public async Task ExampleReplyNextMessageAsync()
-        {
-            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
-
-            if (result.IsSuccess == true)
-            {
-                Interactivity.DelayedSendMessageAndDeleteAsync(
-                                Context.Channel,
-                                deleteDelay: TimeSpan.FromSeconds(20),
-                                text: result.Value.Content,
-                                embed: result.Value.Embeds.FirstOrDefault());
-            }
-        }
+       
 
         [Command("create")]
         public async Task CreateGame()
@@ -147,19 +102,23 @@ namespace BoredGamesBot.Modules
 
         }
 
-        [Command("move")]
+        //TODO CHANGE INPUT TO STTRING
+        [Command("move", RunMode = RunMode.Async)]
         public async Task TakeMoveAsync(char col, int row)
         { 
-
+            
             TicTacToeMove move = new TicTacToeMove();
             move.Cost = 1;
             move.Utility = 1;
             move.Row = row;
             move.Col = col;
-            move.Token = 'X';
 
-            await ReplyAsync(GameService.AttemptMove(Context.User, move));
+            await ReplyAsync(GameService.AttemptMoveAsync(Context.User, move).Result);
 
+            string reply;
+            reply = await GameService.PlayAysnc(Context, false);
+            if(reply != "")
+                await ReplyAsync(reply);
 
         }
     }

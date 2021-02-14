@@ -1,13 +1,13 @@
 ﻿using BoredGamesBot.Games.Common;
 using BoredGamesBot.Games.Players;
 using BoredGamesBot.Games.TicTacToe;
-using Interactivity;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Discord.Addons.Interactive;
 
 namespace BoredGamesBot.Services
 {
@@ -15,11 +15,14 @@ namespace BoredGamesBot.Services
     {
         private readonly DiscordSocketClient _discord;
 
-        private Dictionary<ulong, TicTacToe> currentGames;
+        private Dictionary<Guid, TicTacToe> CurrentGames;
+        private Dictionary<ulong, List<Guid> > PlayersGames;
+
 
         public GameService(DiscordSocketClient discord)
         {
-            currentGames = new Dictionary<ulong, TicTacToe>();
+            CurrentGames = new Dictionary<Guid, TicTacToe>();
+            PlayersGames = new Dictionary<ulong, List<Guid> >();
             _discord = discord;
 
             // Reaction added 
@@ -30,37 +33,124 @@ namespace BoredGamesBot.Services
         {
 
         }
-
-
-        public async Task<int> PlayAysnc(ICommandContext Context)
+        public bool CreateNewGame(SocketCommandContext Context, InteractiveService Interactivity)
         {
-           
-            int result = await currentGames.GetValueOrDefault(Context.User.Id).PlayAsync();
+            Guid guid = Guid.NewGuid();
 
-            // return Task.FromResult<int>(result);
-             return result;
-        }
+            //Initialise dictionary if this is users first game
+            if (!PlayersGames.ContainsKey(Context.User.Id))
+            {
+                PlayersGames.Add(Context.User.Id, new List<Guid>());
+            }
 
-        public bool CreateNewGame(ICommandContext Context, InteractivityService Interactivity)
-        {
-            currentGames.Add(Context.User.Id, new TicTacToe(Context, Interactivity));
-            currentGames.GetValueOrDefault(Context.User.Id).Start();
-      
+            //cant only play 5 games at time
+            //if (playersGames[Context.User.Id].Count > 5)
+            //{
+            //    throw new NotImplementedException();
+            //}
+
+            PlayersGames[Context.User.Id].Add(guid);
+
+            CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
+            CurrentGames[guid].StartAsync();
             return true;
         }
 
-        public string AttemptMove(SocketUser user, Move move)
+        public async Task<string> PlayAysnc(ICommandContext Context, bool quickplay = true, int index = -1 )
         {
-            TicTacToe game;
-
-            if (!currentGames.TryGetValue(user.Id, out game))
+   
+            if (!PlayersGames.TryGetValue(Context.User.Id, out List<Guid> Games))
             {
-                return "not playing a game currently";
+                return "Player not playing any games";
+            }
+            
+            //get last added game
+            if (index == -1) { index = Games.Count - 1; }
+           
+            if(!CurrentGames.TryGetValue(Games[index], out TicTacToe game))
+            {
+                return "$Player playing a game at index {index}";
             }
 
-            if (game.AttemptMove((TicTacToeMove)move))
+           
+            var status = await game.PlayAsync(quickplay);
+
+            if (status != TicTacToe.Status.Incomplete)
             {
-                return "Move applied" + game.BoardToString(); 
+                game.ConcludePlay();
+                if (! RemoveGame(Games[index]))
+               {
+                    throw new NotImplementedException();
+               }
+
+                return "Game Completed";
+            }
+
+            // return Task.FromResult<int>(result);
+            //   return result;
+
+            if (!quickplay)
+                return "";
+
+            return "Quick Play Haulted";
+        }
+
+        private bool RemoveGame(Guid gameGuid)
+        {
+            if (!CurrentGames.TryGetValue(gameGuid, out TicTacToe game))
+            {
+                return false;
+            }
+
+            foreach (var player in game.GetPlayers())
+            {
+                //if player is not AI
+                if (player.Id != 0)
+                {
+                    if (!PlayersGames.TryGetValue(player.Id, out List<Guid> CurrentPlayersGames))
+                    {
+                        return false;
+                    }
+
+                    CurrentPlayersGames.Remove(gameGuid);
+                }
+
+            }
+
+             CurrentGames.Remove(gameGuid);
+
+            return true;
+        }
+
+
+        public async Task<string> AttemptMoveAsync(SocketUser user, Move move, int index = -1)
+        {
+            //check if user playing a game
+            if (!PlayersGames.TryGetValue(user.Id, out List<Guid> Games))
+            {
+                return "Player not playing any games";
+            }
+
+            //get last added game
+            if (index == -1) { index = Games.Count - 1; }
+
+            //Check if user is playing indexed game
+            if (!CurrentGames.TryGetValue(Games[index], out TicTacToe game))
+            {
+                return "$Player playing a game at index {index}";
+            }
+
+            //ulong otherID = 0;
+            //currentPVP.TryGetValue(user.Id, out otherID);
+
+            //if (!(CurrentGames.TryGetValue(user.Id, out game) || CurrentGames.TryGetValue(otherID, out game)))
+            //{
+            //    return "not playing a game currently";
+            //}
+
+            if (game.AttemptMove((TicTacToeMove)move, user.Id))
+            {
+                return "Move applied";
             }
 
             return "Failed to apply move";
@@ -68,11 +158,10 @@ namespace BoredGamesBot.Services
 
 
 
-
-        public bool PlayingGame(SocketUser user)
-        {
-            return currentGames.ContainsKey(user.Id);
-        }
+        //public bool PlayingGame(SocketUser user)
+        //{
+        //    return PlayersGames.ContainsKey(user.Id);
+        //}
 
     }
 }
