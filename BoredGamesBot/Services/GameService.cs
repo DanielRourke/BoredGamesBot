@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Addons.Interactive;
+using Discord;
 
 namespace BoredGamesBot.Services
 {
@@ -52,6 +53,43 @@ namespace BoredGamesBot.Services
             PlayersGames[Context.User.Id].Add(guid);
 
             CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
+            CurrentGames[guid].StartAsync();
+            return true;
+        }
+
+        public bool CreateNewGame(SocketCommandContext Context, InteractiveService Interactivity, IUser challanger = null)
+        {
+            Guid guid = Guid.NewGuid();
+
+            //Initialise dictionary if this is users first game
+            if (!PlayersGames.ContainsKey(Context.User.Id))
+            {
+                PlayersGames.Add(Context.User.Id, new List<Guid>());
+            }
+
+            //cant only play 5 games at time
+            //if (playersGames[Context.User.Id].Count > 5)
+            //{
+            //    throw new NotImplementedException();
+            //}
+
+            PlayersGames[Context.User.Id].Add(guid);
+
+            if(challanger != null)
+            {
+                if (!PlayersGames.ContainsKey(challanger.Id))
+                {
+                    PlayersGames.Add(challanger.Id, new List<Guid>());
+                }
+                PlayersGames[challanger.Id].Add(guid);
+                CurrentGames.Add(guid, new TicTacToe(Context, Interactivity, challanger));
+            }
+            else
+            {
+                CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
+            }
+
+   
             CurrentGames[guid].StartAsync();
             return true;
         }
@@ -162,6 +200,8 @@ namespace BoredGamesBot.Services
         //{
         //    return PlayersGames.ContainsKey(user.Id);
         //}
+
+
 
     }
 }

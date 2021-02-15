@@ -36,6 +36,15 @@ namespace BoredGamesBot.Games.Players
             Name = Context.User.Username;
         }
 
+        public DiscordUserPlayer(SocketCommandContext context, int token, InteractiveService interactivity , Discord.IUser user)
+        {
+            Context = context;
+            Interactive = interactivity;
+            Id = user.Id;
+            Token = token;
+            Name = user.Username;
+        }
+
 
         public async Task<T> SelectMoveAsync(Board<T> board)
         {
@@ -61,9 +70,9 @@ namespace BoredGamesBot.Games.Players
             return null;
         }
 
-        private async Task ReplyAsync(string v)
+        private async Task<Discord.Rest.RestUserMessage> ReplyAsync(string v)
         {
-          await Context.Channel.SendMessageAsync(v);
+          return await Context.Channel.SendMessageAsync(v);
         }
 
         public InteractiveService Interactive { get; set; }

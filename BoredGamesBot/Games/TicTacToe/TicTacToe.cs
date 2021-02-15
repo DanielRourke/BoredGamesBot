@@ -37,6 +37,14 @@ namespace BoredGamesBot.Games.TicTacToe
             board = new TicTacToeBoard();
         }
 
+        public TicTacToe(SocketCommandContext context, InteractiveService interactivity, Discord.IUser challenger) : base(context)
+        {
+            players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'X', interactivity));
+            players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'O', interactivity, challenger));
+            playerTurn = 0;
+            board = new TicTacToeBoard();
+        }
+
         public override async Task StartAsync()
         {
             SelectStatingState();

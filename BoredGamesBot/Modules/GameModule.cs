@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
-
+using Discord.WebSocket;
 
 namespace BoredGamesBot.Modules
 {
@@ -83,20 +83,71 @@ namespace BoredGamesBot.Modules
            await ReplyAsync(reply);
         }
 
-
-       
-
-        [Command("create")]
-        public async Task CreateGame()
+        [Command("stop")]
+        public async Task Stop(int index = 0)
         {
-            string reply;
-            if (GameService.CreateNewGame(Context, Interactivity))
-            {
-                reply = "Game Created";
 
+        }
+
+
+
+       [Command("create")]
+        public async Task CreateGame(IUser user = null)
+        {
+            string reply = "nuddo";
+            if (user != null)
+            {
+               if( GameService.CreateNewGame(Context, Interactivity, user))
+                {
+                    reply = "Challage!";
+                }
             }
             else
-                reply = "Game not created";
+            {
+
+                if (GameService.CreateNewGame(Context, Interactivity))
+                {
+                    reply = "Game Created";
+
+                }
+                else
+                    reply = "Game not created";
+            }
+
+
+            await ReplyAsync(reply);
+
+
+        }
+
+        [Command("download", RunMode = RunMode.Async)]
+        public async Task download()
+        {
+            await Context.Guild.DownloadUsersAsync();
+            string reply = "download complere";
+            
+
+            await ReplyAsync(reply);
+
+
+        }
+
+
+        [Command("get")]
+        public async Task GetUser(IUser user = null)
+        {
+         
+            string reply = "nuddo";
+            if (user != null)
+            {
+                reply = user.Username.ToString();
+            }
+            else
+            {
+                reply = "empty";
+            }
+
+
             await ReplyAsync(reply);
 
 
@@ -119,6 +170,35 @@ namespace BoredGamesBot.Modules
             reply = await GameService.PlayAysnc(Context, false);
             if(reply != "")
                 await ReplyAsync(reply);
+
+        }
+
+        [Command("create")]
+        public async Task ChallangePlayer(String player)
+        {
+            
+            switch (player) 
+            {
+                case "Random":
+                    //add player
+                    break;
+                default:
+
+                    break;
+            }
+
+
+
+            string reply;
+            if (GameService.CreateNewGame(Context, Interactivity))
+            {
+                reply = "Game Created";
+
+            }
+            else
+                reply = "Game not created";
+            await ReplyAsync(reply);
+
 
         }
     }
