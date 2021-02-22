@@ -53,10 +53,10 @@ namespace BoredGamesBot.Games.Players
             move.Token = Token;
 
          //   await ReplyAsync(board.ToString() + $"\n {Name} , your turn!");
-            var response = await NextMessageAsync();
+            var response = await NextMessageAsync(false);
             if (response != null)
             {
-                if (move.AttemptInit(response.Content))
+                if (response.Author.Id == Id && move.AttemptInit(response.Content))
                     return move;
                 else 
                 {

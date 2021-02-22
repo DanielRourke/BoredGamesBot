@@ -89,7 +89,6 @@ namespace BoredGamesBot.Services
                 CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
             }
 
-   
             CurrentGames[guid].StartAsync();
             return true;
         }

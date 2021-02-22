@@ -1,4 +1,5 @@
 ﻿using BoredGamesBot.Games.Players;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace BoredGamesBot.Games.Common
         protected Board<T> board;
         public SocketCommandContext Context { get; set; }
         public Discord.Rest.RestUserMessage GameDisplay { get; set; }
+        public InteractiveService Interactive { get; set; }
 
         protected int playerTurn; 
         public bool QuickPlay { get; set; }
@@ -94,6 +96,7 @@ namespace BoredGamesBot.Games.Common
         public virtual void SelectNextPlayer()
         {
             playerTurn = (playerTurn + 1) % players.Count;
+            GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
         }
 
         public bool PlayerTurn(IPlayer<T> p) => players[playerTurn] == p;
@@ -198,8 +201,11 @@ namespace BoredGamesBot.Games.Common
             
             while ((continuous || players[playerTurn].GetType() != typeof(DiscordUserPlayer<T>)) && GameStatus() == Status.Incomplete)
             {
-                await GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
+               // await GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
                 //await Context.Channel.SendMessageAsync(board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
+                
+
+                
                 T move = await players[playerTurn].SelectMoveAsync(board);
 
                 //not sure this should be here
@@ -212,7 +218,6 @@ namespace BoredGamesBot.Games.Common
                     AttemptMove(move);
                 }
             }
-
 
             return GameStatus();
         }

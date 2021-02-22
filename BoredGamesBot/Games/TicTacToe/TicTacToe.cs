@@ -32,7 +32,7 @@ namespace BoredGamesBot.Games.TicTacToe
         public TicTacToe(SocketCommandContext context, InteractiveService interactivity): base(context)
         {
             players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'X', interactivity));
-            players.Add(new RandomPlayer<TicTacToeMove>('Z'));
+            players.Add(new RandomPlayer<TicTacToeMove>('O'));
             playerTurn = 0;
             board = new TicTacToeBoard();
         }
@@ -49,6 +49,10 @@ namespace BoredGamesBot.Games.TicTacToe
         {
             SelectStatingState();
             GameDisplay = await Context.Channel.SendMessageAsync(board.ToString());
+            GameDisplay.AddReactionAsync
+
+
+            Interactive.AddReactionCallback(GameDisplay, GameDisplay);
 
             await GameDisplay.PinAsync();
         }
@@ -68,16 +72,17 @@ namespace BoredGamesBot.Games.TicTacToe
         {
             int[,] state = board.GetBoardState();
 
-            int hieght = state.GetLength(0);
+            int height = state.GetLength(0);
             int width = state.GetLength(1);
 
-            for (int i = 0; i < hieght; i++)
+            for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
                    if(  threeInRow(i, j, 0, 0, 1, state, state[i,j]) ||
                         threeInRow(i, j, 0, 1, 0, state, state[i, j]) ||
-                        threeInRow(i, j, 0, 1, 1, state, state[i, j]) )
+                        threeInRow(i, j, 0, 1, 1, state, state[i, j]) ||
+                        threeInRow(i, j, 0, 1, -1, state, state[i, j]))
                     {
                         for(int k =0; k < players.Count; k++)
                         {

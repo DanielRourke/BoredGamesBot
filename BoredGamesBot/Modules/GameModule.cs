@@ -76,7 +76,7 @@ namespace BoredGamesBot.Modules
         [Command("play", RunMode = RunMode.Async)]
         public async Task Play(int index = 0)
         {
-  
+            
             string  reply;
             reply = await GameService.PlayAysnc(Context);
 
@@ -168,7 +168,7 @@ namespace BoredGamesBot.Modules
 
             string reply;
             reply = await GameService.PlayAysnc(Context, false);
-            if(reply != "")
+            if (reply != "")
                 await ReplyAsync(reply);
 
         }
