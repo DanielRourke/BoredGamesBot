@@ -195,10 +195,6 @@ namespace BoredGamesBot.Services
 
 
 
-        //public bool PlayingGame(SocketUser user)
-        //{
-        //    return PlayersGames.ContainsKey(user.Id);
-        //}
 
 
 
