@@ -1,11 +1,13 @@
 ﻿using BoredGamesBot.Games.Common;
 using BoredGamesBot.Games.Players;
+using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BoredGamesBot.Games.TicTacToe
@@ -29,7 +31,7 @@ namespace BoredGamesBot.Games.TicTacToe
         //    board = new TicTacToeBoard();
         //}
 
-        public TicTacToe(SocketCommandContext context, InteractiveService interactivity): base(context)
+        public TicTacToe(SocketCommandContext context, InteractiveService interactivity): base(context, interactivity)
         {
             players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'X', interactivity));
             players.Add(new RandomPlayer<TicTacToeMove>('O'));
@@ -37,7 +39,7 @@ namespace BoredGamesBot.Games.TicTacToe
             board = new TicTacToeBoard();
         }
 
-        public TicTacToe(SocketCommandContext context, InteractiveService interactivity, Discord.IUser challenger) : base(context)
+        public TicTacToe(SocketCommandContext context, InteractiveService interactivity, Discord.IUser challenger) : base(context, interactivity)
         {
             players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'X', interactivity));
             players.Add(new DiscordUserPlayer<TicTacToeMove>(context, 'O', interactivity, challenger));
@@ -48,13 +50,31 @@ namespace BoredGamesBot.Games.TicTacToe
         public override async Task StartAsync()
         {
             SelectStatingState();
+
+            Emoji[] emojis = new Emoji[7];
+            emojis[0] = new Emoji("\uD83C\uDDE6"); //A
+            emojis[1] = new Emoji("\uD83C\uDDE7"); //B
+            emojis[2] = new Emoji("\uD83C\uDDE8"); //C
+            emojis[3] = new Emoji("\u0030\u20E3"); //0
+            emojis[4] = new Emoji("\u0031\u20E3"); //1
+            emojis[5] = new Emoji("\u0032\u20E3"); //2
+            emojis[6] = new Emoji("\uD83C\uDD97"); //OK
+
+   
+
             GameDisplay = await Context.Channel.SendMessageAsync(board.ToString());
-            GameDisplay.AddReactionAsync
 
 
-            Interactive.AddReactionCallback(GameDisplay, GameDisplay);
+            foreach (var emoji in emojis)
+            {
+                await GameDisplay.AddReactionAsync(emoji);
+            }
 
-            await GameDisplay.PinAsync();
+
+           // await GameDisplay.AddReactionAsync(emojis[0]);
+           //await GameDisplay.PinAsync();
+
+ 
         }
 
         public override void ConcludePlay()
@@ -124,6 +144,26 @@ namespace BoredGamesBot.Games.TicTacToe
         {
             SelectStatingState();
             board.ToString();
+        }
+
+        public override async Task<TicTacToeMove> awaitReactionMoveAsync(CancellationToken token)
+        {
+
+            TicTacToeReactionCallback callback = new TicTacToeReactionCallback(players[playerTurn], board, GameDisplay);
+
+
+            Interactive.AddReactionCallback(GameDisplay, callback);
+
+            //slow poll;
+            while(!callback.Complete || token.IsCancellationRequested )
+            {
+                await Task.Delay(25);
+            }
+
+            Interactive.ClearReactionCallbacks();
+
+            return callback.Move;
+
         }
     }
 }

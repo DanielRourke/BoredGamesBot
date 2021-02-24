@@ -31,6 +31,9 @@ namespace BoredGamesBot.Games.TicTacToe
 
         public override bool ValidMove(TicTacToeMove move)
         {
+            if (!(move.Row != null && move.Col != null))
+                return false;
+
             int r = move.Row;
             int c = move.Col - 'A';
             if (r < 0 || r >= width || c < 0 || c >= height || boardState[r,c] != -1)

@@ -34,7 +34,7 @@ namespace BoredGamesBot.Services
         {
 
         }
-        public bool CreateNewGame(SocketCommandContext Context, InteractiveService Interactivity)
+        public async Task<bool> CreateNewGameAsync(SocketCommandContext Context, InteractiveService Interactivity)
         {
             Guid guid = Guid.NewGuid();
 
@@ -53,11 +53,11 @@ namespace BoredGamesBot.Services
             PlayersGames[Context.User.Id].Add(guid);
 
             CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
-            CurrentGames[guid].StartAsync();
+            await CurrentGames[guid].StartAsync();
             return true;
         }
 
-        public bool CreateNewGame(SocketCommandContext Context, InteractiveService Interactivity, IUser challanger = null)
+        public async Task<bool> CreateNewGameAsync(SocketCommandContext Context, InteractiveService Interactivity, IUser challanger = null)
         {
             Guid guid = Guid.NewGuid();
 
@@ -89,7 +89,7 @@ namespace BoredGamesBot.Services
                 CurrentGames.Add(guid, new TicTacToe(Context, Interactivity));
             }
 
-            CurrentGames[guid].StartAsync();
+            await CurrentGames[guid].StartAsync();
             return true;
         }
 

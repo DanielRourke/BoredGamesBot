@@ -4,6 +4,7 @@ using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BoredGamesBot.Games.Common
@@ -23,11 +24,12 @@ namespace BoredGamesBot.Games.Common
 
         public enum Status { Incomplete = -1,  Draw, WinOne, WinTwo};
 
-        public Game(SocketCommandContext context)
+        public Game(SocketCommandContext context, InteractiveService interactive)
         {
             Context = context;
             players = new List<IPlayer<T>>();
             QuickPlay = true;
+            Interactive = interactive;
         }
         
         public virtual async Task StartAsync()
@@ -36,6 +38,8 @@ namespace BoredGamesBot.Games.Common
 
             await GameDisplay.PinAsync();
             await GameDisplay.ModifyAsync(msg => msg.Content = "test [edited]");
+
+
 
             //GameDisplay = Context.Channel.S
         }
@@ -201,24 +205,33 @@ namespace BoredGamesBot.Games.Common
             
             while ((continuous || players[playerTurn].GetType() != typeof(DiscordUserPlayer<T>)) && GameStatus() == Status.Incomplete)
             {
-               // await GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
+                 await GameDisplay.ModifyAsync(msg => msg.Content = board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
                 //await Context.Channel.SendMessageAsync(board.ToString() + $"\n Current it's {players[playerTurn].Name} turn");
-                
 
-                
-                T move = await players[playerTurn].SelectMoveAsync(board);
+                CancellationTokenSource cts = new CancellationTokenSource();
+
+              //  cts.CancelAfter(60000);
+                Task<T> select = players[playerTurn].SelectMoveAsync(board, cts.Token);
+                Task<T> react = awaitReactionMoveAsync(cts.Token);
+
+                //  T move = await players[playerTurn].SelectMoveAsync(board);
+
+                Task < T > getMove =  await Task.WhenAny(select, react);
+
+                cts.Cancel();
 
                 //not sure this should be here
-                if (move == null)
+                if (getMove.Result == null)
                 {
                     continuous = false;
                 }
                 else
                 {
-                    AttemptMove(move);
+                    AttemptMove(getMove.Result);
                 }
+    
             }
-
+         
             return GameStatus();
         }
 
@@ -285,12 +298,13 @@ namespace BoredGamesBot.Games.Common
         }
 
 
-
-
         public bool isPlayersTurn(ulong id)
         {
             return GetPlayerIndex(id) == playerTurn;
         }
+
+        public abstract Task<T> awaitReactionMoveAsync(CancellationToken token);
+
 
     }
 }

@@ -91,13 +91,13 @@ namespace BoredGamesBot.Modules
 
 
 
-       [Command("create")]
+       [Command("create", RunMode = RunMode.Async)]
         public async Task CreateGame(IUser user = null)
         {
             string reply = "nuddo";
             if (user != null)
             {
-               if( GameService.CreateNewGame(Context, Interactivity, user))
+               if( await GameService.CreateNewGameAsync(Context, Interactivity, user))
                 {
                     reply = "Challage!";
                 }
@@ -105,7 +105,7 @@ namespace BoredGamesBot.Modules
             else
             {
 
-                if (GameService.CreateNewGame(Context, Interactivity))
+                if (await GameService.CreateNewGameAsync(Context, Interactivity))
                 {
                     reply = "Game Created";
 
@@ -173,33 +173,33 @@ namespace BoredGamesBot.Modules
 
         }
 
-        [Command("create")]
-        public async Task ChallangePlayer(String player)
-        {
+        //[Command("create")]
+        //public async Task ChallangePlayer(String player)
+        //{
             
-            switch (player) 
-            {
-                case "Random":
-                    //add player
-                    break;
-                default:
+        //    switch (player) 
+        //    {
+        //        case "Random":
+        //            //add player
+        //            break;
+        //        default:
 
-                    break;
-            }
-
-
-
-            string reply;
-            if (GameService.CreateNewGame(Context, Interactivity))
-            {
-                reply = "Game Created";
-
-            }
-            else
-                reply = "Game not created";
-            await ReplyAsync(reply);
+        //            break;
+        //    }
 
 
-        }
+
+        //    string reply;
+        //    if (await GameService.CreateNewGameAsync(Context, Interactivity))
+        //    {
+        //        reply = "Game Created";
+
+        //    }
+        //    else
+        //        reply = "Game not created";
+        //    await ReplyAsync(reply);
+
+
+        //}
     }
 }

@@ -46,15 +46,20 @@ namespace BoredGamesBot.Games.Players
         }
 
 
-        public async Task<T> SelectMoveAsync(Board<T> board)
+        public async Task<T> SelectMoveAsync(Board<T> board, CancellationToken token)
         {
 
             T move = (T)Activator.CreateInstance(typeof(T));
             move.Token = Token;
 
          //   await ReplyAsync(board.ToString() + $"\n {Name} , your turn!");
-            var response = await NextMessageAsync(false);
-            if (response != null)
+            var response = await NextMessageAsync(false, true, TimeSpan.FromSeconds(60.0), token);
+            if(response == null)
+            {
+                if (!token.IsCancellationRequested)
+                    await ReplyAsync("You did not reply before the timeout use !move to add a move or !play to continue play");
+            }
+            else
             {
                 if (response.Author.Id == Id && move.AttemptInit(response.Content))
                     return move;
@@ -63,10 +68,7 @@ namespace BoredGamesBot.Games.Players
                     await ReplyAsync("That wasnt a Valid Move");
                 }
             }
-            else
-                await ReplyAsync("You did not reply before the timeout use !move to add a move or !play to continue play");
-
-
+           
             return null;
         }
 
